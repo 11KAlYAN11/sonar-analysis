@@ -1,28 +1,34 @@
+package com.example.demo;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class VulnerableApp {
 
-    // Hard-coded password vulnerability
-    private static final String DB_PASSWORD = "password123";
+    private static final Logger logger = Logger.getLogger(VulnerableApp.class.getName());
+
+    // Avoid hard-coded passwords - would be better to load from a secure vault or environment variable
+    private static final String DB_PASSWORD = System.getenv("DB_PASSWORD");
 
     public static void main(String[] args) {
         VulnerableApp app = new VulnerableApp();
         Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter username: ");
+        logger.info("Enter username: ");
         String username = scanner.nextLine();
 
-        System.out.print("Enter password: ");
+        logger.info("Enter password: ");
         String password = scanner.nextLine();
 
         if (app.login(username, password)) {
-            System.out.println("Login successful!");
+            logger.info("Login successful!");
         } else {
-            System.out.println("Login failed.");
+            logger.info("Login failed.");
         }
 
         scanner.close();
@@ -33,42 +39,49 @@ public class VulnerableApp {
         Statement stmt = null;
 
         try {
-            // Hard-coded database URL and credentials
+            // Using environment variables or configuration management for credentials
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb", "user", DB_PASSWORD);
             stmt = connection.createStatement();
 
-            // SQL Injection vulnerability
-            String query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
-            ResultSet rs = stmt.executeQuery(query);
-
-            return rs.next();
+            // Preventing SQL Injection by using parameterized queries
+            String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+            try (var preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, username);
+                preparedStatement.setString(2, password);
+                ResultSet rs = preparedStatement.executeQuery();
+                return rs.next();
+            }
         } catch (Exception e) {
-            // Catching generic exception - SonarQube will flag this as a bad practice
-            e.printStackTrace();
+            // Logging error with specific message and level
+            logger.log(Level.SEVERE, "An error occurred during login", e);
             return false;
         } finally {
+            // Properly closing resources using try-with-resources if possible
             try {
                 if (stmt != null) stmt.close();
                 if (connection != null) connection.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Error closing resources", e);
             }
         }
     }
 
     public void handleUserInput() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your age: ");
-        int age = scanner.nextInt();
-
-        // No input validation - potential vulnerability
-        System.out.println("You entered: " + age);
-
-        if (age > 18) {
-            System.out.println("You are an adult.");
-        } else {
-            System.out.println("You are a minor.");
+        logger.info("Enter your age: ");
+        int age;
+        try {
+            age = Integer.parseInt(scanner.nextLine());
+            logger.info("You entered: " + age);
+            if (age > 18) {
+                logger.info("You are an adult.");
+            } else {
+                logger.info("You are a minor.");
+            }
+        } catch (NumberFormatException e) {
+            logger.log(Level.WARNING, "Invalid age entered", e);
+        } finally {
+            scanner.close();
         }
-        scanner.close();
     }
 }
