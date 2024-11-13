@@ -71,15 +71,17 @@ public class VulnerableApp {
         logger.info("Enter your age: ");
         int age;
         try {
-            age = Integer.parseInt(scanner.nextLine());
-            logger.info("You entered: " + age);
-            if (age > 18) {
-                logger.info("You are an adult.");
-            } else {
-                logger.info("You are a minor.");
-            }
-        } catch (NumberFormatException e) {
-            logger.log(Level.WARNING, "Invalid age entered", e);
+    age = Integer.parseInt(scanner.nextLine());
+    logger.info(String.format("You entered: %d", age));
+    if (age > 18) {
+        logger.info("You are an adult.");
+    } else {
+        logger.info("You are a minor.");
+    }
+} catch (NumberFormatException e) {
+    logger.log(Level.WARNING, "Invalid age entered", e);
+}
+
         } finally {
             scanner.close();
         }
