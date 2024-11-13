@@ -8,6 +8,8 @@ class DemoApplicationTests {
 
 	@Test
 	void contextLoads() {
+		//It is an Empty file
+		logger.info("This is an Empty method");
 	}
 
 }
