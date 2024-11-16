@@ -1,0 +1,40 @@
+# Deployment Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-app-deployment
+  labels:
+    app: springboot-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-app
+  template:
+    metadata:
+      labels:
+        app: springboot-app
+    spec:
+      containers:
+      - name: springboot-container
+        image: <your-docker-username>/springboot-app:latest # Replace with your image name
+        ports:
+        - containerPort: 8080 # Default port for Spring Boot
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "default" # Optional: Specify active Spring profile
+---
+# Service Configuration
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-app-service
+spec:
+  selector:
+    app: springboot-app
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80          # Exposed port
+    targetPort: 8080  # Container port where Spring Boot is running
+    nodePort: 31120   # Optional: Specify a custom NodePort if needed
