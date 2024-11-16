@@ -17,9 +17,9 @@ spec:
     spec:
       containers:
       - name: springboot-container
-        image: <your-docker-username>/springboot-app:latest # Replace with your image name
+        image: asampavan14322/demo1:60 # Replace with your image name
         ports:
-        - containerPort: 8080 # Default port for Spring Boot
+        - containerPort: 8000 # Default port for Spring Boot
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "default" # Optional: Specify active Spring profile
